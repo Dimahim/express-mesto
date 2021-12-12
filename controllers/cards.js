@@ -29,7 +29,7 @@ module.exports.deleteCard = (req, res) => {
           .then(() => res.status(200).send({ message: 'Карточка удалена' }));
       }
     })
-    .catch((e) => console.log(e));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 // Ставим лайк карочке
@@ -45,7 +45,7 @@ module.exports.putLike = (req, res) => {
       }
       res.status(200).send({ data: card });
     })
-    .catch((e) => console.log(e));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 // Удаляем лайк
@@ -61,5 +61,5 @@ module.exports.removeLike = (req, res) => {
       }
       return res.status(200).send({ data: card });
     })
-    .catch((e) => console.log(e));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };

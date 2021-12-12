@@ -16,7 +16,7 @@ module.exports.getUserID = (req, res) => {
       }
       res.status(200).send({ data: user });
     })
-    .catch((e) => console.log(e));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 // Создаем пользователя
@@ -42,7 +42,7 @@ module.exports.updateUser = (req, res) => {
       }
       res.status(200).send(user);
     })
-    .catch((e) => console.log(e));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 // Обновляем аватар
@@ -58,5 +58,5 @@ module.exports.updateAvatar = (req, res) => {
       }
       res.status(200).send(user);
     })
-    .catch((e) => console.log(e));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
