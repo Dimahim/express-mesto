@@ -14,22 +14,33 @@ module.exports.createCard = (req, res) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => res.status(200).send({ body: card }))
-    .catch((err) => res.status(400).send({ massage: `Переданы некорректные данные ${err}` }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: `Переданы некорректные данные ${err}` });
+      } else {
+        res.status(500).send({ message: `На сервере произошла ошибка ${err}` });
+      }
+    });
 };
 
 // Удаляем карточку
 module.exports.deleteCard = (req, res) => {
-  const owner = req.user._id;
   Card.findOne({ _id: req.params.cardId })
     .then((card) => {
-      if (!card.owner.equals(owner)) {
+      if (!card) {
         res.status(404).send({ message: 'Карточка не найдена' });
       } else {
         Card.deleteOne(card)
           .then(() => res.status(200).send({ message: 'Карточка удалена' }));
       }
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: `Невалидный id  ${err}` });
+      } else {
+        res.status(500).send({ message: `На сервере произошла ошибка ${err}` });
+      }
+    });
 };
 
 // Ставим лайк карочке
@@ -42,10 +53,17 @@ module.exports.putLike = (req, res) => {
     .then((card) => {
       if (!card) {
         res.status(404).send({ message: 'Карточка не найдена' });
+      } else {
+        res.status(200).send({ data: card });
       }
-      res.status(200).send({ data: card });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: `Невалидный id  ${err}` });
+      } else {
+        res.status(500).send({ message: `На сервере произошла ошибка ${err}` });
+      }
+    });
 };
 
 // Удаляем лайк
@@ -58,8 +76,15 @@ module.exports.removeLike = (req, res) => {
     .then((card) => {
       if (!card) {
         res.status(404).send({ message: 'Карточка не найдена' });
+      } else {
+        res.status(200).send({ data: card });
       }
-      return res.status(200).send({ data: card });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: `Невалидный id  ${err}` });
+      } else {
+        res.status(500).send({ message: `На сервере произошла ошибка ${err}` });
+      }
+    });
 };

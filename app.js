@@ -28,6 +28,12 @@ app.use('/', routerUser);
 // получаем роуты карточек
 app.use('/', routerCards);
 
+// обработка несуществующего роута
+app.use((req, res) => {
+  res.status(404).send({ message: 'Страница не найдена' });
+});
+
+// Слушаем порт
 app.listen(PORT, () => {
   console.log(`Projeсt is listenning on port ${PORT}`);
 });
