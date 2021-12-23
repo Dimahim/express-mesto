@@ -1,14 +1,18 @@
 const Card = require('../models/card');
 
+const ForbiddenError = require('../errors/forbiddenError');
+const NotFoundError = require('../errors/notFoundError');
+const ValidateError = require('../errors/validateError');
+
 // Получаем все карточки
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.status(200).send({ cards }))
-    .catch((err) => res.status(500).send({ massage: `На сервере произошла ошибка ${err}` }));
+    .catch(next);
 };
 
 // Создаем карточку
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   console.log(req.body);
   const { name, link } = req.body;
   const owner = req.user._id;
@@ -16,35 +20,40 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(200).send({ body: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: `Переданы некорректные данные ${err}` });
+        throw new ValidateError('Переданы некорректные данные');
       } else {
-        res.status(500).send({ message: `На сервере произошла ошибка ${err}` });
+        throw err;
       }
-    });
+    })
+    .catch(next);
 };
 
 // Удаляем карточку
-module.exports.deleteCard = (req, res) => {
-  Card.findOne({ _id: req.params.cardId })
+module.exports.deleteCard = (req, res, next) => {
+  const owner = req.user._id;
+  Card
+    .findOne({ _id: req.params.cardId })
+    .orFail(() => new NotFoundError('Карточка не найдена'))
     .then((card) => {
-      if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
+      if (!card.owner.equals(owner)) {
+        throw new ForbiddenError('Нет прав на удаление этой карточки');
       } else {
         Card.deleteOne(card)
           .then(() => res.status(200).send({ message: 'Карточка удалена' }));
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: `Невалидный id  ${err}` });
+      if (err.kind === 'ObjectId') {
+        throw new ValidateError(' Указан не верный id карточки ');
       } else {
-        res.status(500).send({ message: `На сервере произошла ошибка ${err}` });
+        throw err;
       }
-    });
+    })
+    .catch(next);
 };
 
 // Ставим лайк карочке
-module.exports.putLike = (req, res) => {
+module.exports.putLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -52,22 +61,23 @@ module.exports.putLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
+        throw new NotFoundError('Карточка не найдена');
       } else {
         res.status(200).send({ data: card });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: `Невалидный id  ${err}` });
+        throw new ValidateError('Указан не верный id карточки');
       } else {
-        res.status(500).send({ message: `На сервере произошла ошибка ${err}` });
+        throw err;
       }
-    });
+    })
+    .catch(next);
 };
 
 // Удаляем лайк
-module.exports.removeLike = (req, res) => {
+module.exports.removeLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -75,16 +85,17 @@ module.exports.removeLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
+        throw new NotFoundError('Карточка не найдена');
       } else {
         res.status(200).send({ data: card });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: `Невалидный id  ${err}` });
+        throw new ValidateError('Указан не верный id карточки');
       } else {
-        res.status(500).send({ message: `На сервере произошла ошибка ${err}` });
+        throw err;
       }
-    });
+    })
+    .catch(next);
 };
