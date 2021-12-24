@@ -45,6 +45,8 @@ module.exports.deleteCard = (req, res, next) => {
     .catch((err) => {
       if (err.kind === 'ObjectId') {
         throw new ValidateError(' Указан не верный id карточки ');
+      } if (err.name === 'CastError') {
+        throw new ValidateError('Переданы некорректные данные');
       } else {
         throw err;
       }

@@ -128,6 +128,8 @@ module.exports.updateUser = (req, res, next) => {
       }
       if (err.name === 'CastError') {
         throw new ValidateError('Переданы некорректные данные');
+      } else {
+        throw err;
       }
     })
     .catch(next);
@@ -150,6 +152,9 @@ module.exports.updateAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
+        throw new ValidateError('Переданы некорректные данные');
+      }
+      if (err.name === 'CastError') {
         throw new ValidateError('Переданы некорректные данные');
       } else {
         throw err;
