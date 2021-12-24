@@ -38,7 +38,6 @@ module.exports.getUserID = (req, res, next) => {
 
 // Создаем пользователя
 module.exports.createUser = (req, res, next) => {
-  console.log(req.body);
   const {
     name,
     about,
@@ -126,8 +125,9 @@ module.exports.updateUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new ValidateError('Переданы некорректные данные');
-      } else {
-        throw err;
+      }
+      if (err.name === 'CastError') {
+        throw new ValidateError('Переданы некорректные данные');
       }
     })
     .catch(next);

@@ -29,6 +29,10 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(100),
+    avatar: Joi.string()
+      .regex(/^(https?:\/\/)?([\da-z.-]+).([a-z.]{2,6})([/\w.-]*)*\/?$/),
   }),
 }), createUser);
 
@@ -39,7 +43,7 @@ app.use('/', auth, routerUser);
 app.use('/', auth, routerCards);
 
 // обработка несуществующего роута
-app.use('*', (req, res, next) => {
+app.use('*', auth, (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
