@@ -1,5 +1,4 @@
-// Ошибка доступа.
-
+// Ошибка доступа
 class ForbiddenError extends Error {
   constructor(message) {
     super(message);
@@ -8,3 +7,4 @@ class ForbiddenError extends Error {
 }
 
 module.exports = ForbiddenError;
+
