@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const { errors, celebrate, Joi } = require('celebrate');
 const routerUser = require('./routes/users');
 const routerCards = require('./routes/cards');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const auth = require('./middlewares/auth');
 
 const app = express();
@@ -16,6 +17,9 @@ mongoose.connect('mongodb://localhost:27017/mestodb').catch((err) => console.log
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Мидлвер логи запросов.
+app.use(requestLogger);
 
 // Логин
 app.post('/signin', celebrate({
@@ -46,6 +50,9 @@ app.use('/', auth, routerCards);
 app.use('*', auth, (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
+
+// Мидлвер логи ошибок.
+app.use(errorLogger);
 
 // Обработчик ошибок
 app.use(errors());
