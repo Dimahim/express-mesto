@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const { errors, celebrate, Joi } = require('celebrate');
 const routerUser = require('./routes/users');
 const routerCards = require('./routes/cards');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { errorLogger, requestLogger } = require('./middlewares/logger');
 const auth = require('./middlewares/auth');
 
 const app = express();
